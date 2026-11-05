@@ -1,0 +1,58 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.1.2'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+description = 'the-beauty-salon'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    dependencies {
+        // 1. Для создания контроллеров и REST API
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+
+        // 2. Для работы с базой данных и таблицами (JPA / Hibernate)
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+        // 3. Для валидации (@NotBlank, @NotNull и возврата 400 Bad Request)
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+        // 4. Драйвер PostgreSQL
+        runtimeOnly 'org.postgresql:postgresql'
+
+        // 5. Lombok (для геттеров, сеттеров и логирования @Slf4j)
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+
+        // Для Unit-тестов
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+        // Lombok
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+
+        // Логирование (SLF4J уже включен в spring-boot-starter, но если нужно явно):
+        implementation 'org.slf4j:slf4j-api'
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
