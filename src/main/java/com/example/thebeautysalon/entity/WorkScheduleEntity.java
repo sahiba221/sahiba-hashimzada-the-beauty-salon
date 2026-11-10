@@ -1,10 +1,8 @@
 package com.example.thebeautysalon.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 @Entity
@@ -12,6 +10,7 @@ import java.time.LocalTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table( name = "work_schedule")
 public class WorkScheduleEntity {
     @Id
@@ -20,7 +19,7 @@ public class WorkScheduleEntity {
     @ManyToOne
     @JoinColumn(name = "master_id", nullable = false)
     private MasterEntity master;
-    private String dayOfWeek;
+    private DayOfWeek dayOfWeek;
     private LocalTime startTime;
     private LocalTime endTime;
     private Boolean isWorking;

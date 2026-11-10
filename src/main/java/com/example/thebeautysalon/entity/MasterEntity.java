@@ -1,10 +1,8 @@
 package com.example.thebeautysalon.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +12,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "masters")
 public class MasterEntity {
     @Id
@@ -29,10 +28,13 @@ public class MasterEntity {
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private CategoryEntity category;
+//    Default fetchType.Lazy
     @OneToMany(mappedBy = "master", cascade = CascadeType.ALL)
     List<WorkScheduleEntity> workScheduleEntities = new ArrayList<>();
+    //    Default fetchType.Lazy
     @OneToMany(mappedBy = "master", cascade = CascadeType.ALL)
     List<BookingEntity> bookings = new ArrayList<>();
+    //    Default fetchType.Lazy
     @OneToMany(mappedBy = "master")
     List<ReviewEntity> reviews = new ArrayList<>();
 }

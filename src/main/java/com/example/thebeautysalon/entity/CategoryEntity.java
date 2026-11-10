@@ -1,10 +1,7 @@
 package com.example.thebeautysalon.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +10,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table( name = "categories")
 public class CategoryEntity {
     @Id
@@ -21,8 +19,10 @@ public class CategoryEntity {
     @Column(nullable = false, unique = true)
     private String name;
     private String description;
+    //    Default fetchType.Lazy
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     List<BeautyServiceEntity> beautyServiceEntities = new ArrayList<>();
+    //    Default fetchType.Lazy
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     List<MasterEntity> masters = new ArrayList<>();
 }

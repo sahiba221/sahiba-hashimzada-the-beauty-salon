@@ -2,10 +2,7 @@ package com.example.thebeautysalon.entity;
 
 import com.example.thebeautysalon.enums.EnumRole;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +12,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table( name = "users")
 public class UserEntity {
     @Id
@@ -33,8 +31,10 @@ public class UserEntity {
     private EnumRole enumRole;
     @Column( nullable = false)
     private BigDecimal bonusBalance;
+//    Default  FetchType.Lazy
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     List<BookingEntity> bookings = new ArrayList<>();
+//    Default fetchType.Lazy
     @OneToMany(mappedBy = "user")
     List<ReviewEntity> reviews = new ArrayList<>();
 
