@@ -50,6 +50,12 @@ dependencies {
 
         // Логирование (SLF4J уже включен в spring-boot-starter, но если нужно явно):
         implementation 'org.slf4j:slf4j-api'
+
+        implementation 'org.mapstruct:mapstruct:1.6.3'
+        annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
+        // Lombok və MapStruct-ın birlikdə problemsiz işləməsi üçün:
+        annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
     }
 }
 
