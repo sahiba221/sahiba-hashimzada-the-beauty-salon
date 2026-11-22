@@ -3,6 +3,9 @@ package com.example.thebeautysalon.service;
 import com.example.thebeautysalon.dto.request.CategoryRequestDto;
 import com.example.thebeautysalon.dto.response.CategoryResponseDto;
 import com.example.thebeautysalon.entity.CategoryEntity;
+import com.example.thebeautysalon.exception.AlreadyExistsException;
+import com.example.thebeautysalon.exception.BadRequestException;
+import com.example.thebeautysalon.exception.ResourceNotFoundException;
 import com.example.thebeautysalon.mapper.CategoryMapper;
 import com.example.thebeautysalon.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,30 +27,28 @@ public class CategoryService {
 
     public CategoryResponseDto getById(Long id) {
         CategoryEntity category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not" +
-                        " found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
         return categoryMapper.toCategoryResponseDto(category);
     }
 
     public CategoryResponseDto create(CategoryRequestDto categoryRequestDto) {
         if (categoryRepository.existsByNameIgnoreCase(categoryRequestDto.getName())) {
-            throw new RuntimeException("Category with name : " +
-                    categoryRequestDto.getName() + "already exists ");
+            throw new AlreadyExistsException("Category with name: " + categoryRequestDto.getName() + " already exists.");
         }
         CategoryEntity category = categoryMapper.toCategoryEntity(categoryRequestDto);
         CategoryEntity savedCategory = categoryRepository.save(category);
         return categoryMapper.toCategoryResponseDto(savedCategory);
-
     }
 
     public CategoryResponseDto updateById(Long id, CategoryRequestDto categoryRequestDto) {
         CategoryEntity existingCategory = categoryRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Category not found with id: " + id));
+                () -> new ResourceNotFoundException("Category not found with id: " + id));
+
         if (!categoryRequestDto.getName().equalsIgnoreCase(existingCategory.getName())
                 && categoryRepository.existsByNameIgnoreCase(categoryRequestDto.getName())) {
-            throw new RuntimeException("Category with name " +
-                    categoryRequestDto.getName() + " already exists");
+            throw new AlreadyExistsException("Category with name " + categoryRequestDto.getName() + " already exists.");
         }
+
         existingCategory.setName(categoryRequestDto.getName());
         existingCategory.setDescription(categoryRequestDto.getDescription());
         CategoryEntity updatedCategory = categoryRepository.save(existingCategory);
@@ -56,25 +57,22 @@ public class CategoryService {
 
     public void deleteById(Long id) {
         CategoryEntity existingCategory = categoryRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Category not found with id: " + id));
+                () -> new ResourceNotFoundException("Category not found with id: " + id));
 
         if (!existingCategory.getBeautyServiceEntities().isEmpty() ||
                 !existingCategory.getMasters().isEmpty()) {
-            throw new RuntimeException("Category cannot be deleted as it contains " +
-                    "active masters or services");
+            throw new BadRequestException("Category cannot be deleted as it contains active masters or services.");
         }
         categoryRepository.deleteById(id);
     }
 
     public List<CategoryResponseDto> searchByName(String name) {
-        if(name== null || name.isBlank()){
-            throw new RuntimeException("Name cannot be null or blank");
+        if(name == null || name.isBlank()){
+            throw new BadRequestException("Search name cannot be null or blank.");
         }
         List<CategoryResponseDto> categories = categoryRepository
                 .findByNameContainingIgnoreCase(name).stream()
                 .map(categoryMapper::toCategoryResponseDto).toList();
         return categories;
-
     }
-
 }

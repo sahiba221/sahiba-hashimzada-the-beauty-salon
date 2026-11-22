@@ -5,6 +5,9 @@ import com.example.thebeautysalon.dto.response.BeautyServiceResponseDto;
 import com.example.thebeautysalon.dto.response.CategoryResponseDto;
 import com.example.thebeautysalon.entity.BeautyServiceEntity;
 import com.example.thebeautysalon.entity.CategoryEntity;
+import com.example.thebeautysalon.exception.AlreadyExistsException;
+import com.example.thebeautysalon.exception.BadRequestException;
+import com.example.thebeautysalon.exception.ResourceNotFoundException;
 import com.example.thebeautysalon.mapper.BeautyServiceMapper;
 import com.example.thebeautysalon.mapper.CategoryMapper;
 import com.example.thebeautysalon.repository.BeautyServiceRepository;
@@ -19,7 +22,7 @@ import java.util.List;
 public class BeautyServiceService {
     private final BeautyServiceRepository beautyServiceRepository;
     private final CategoryRepository categoryRepository;
-    private final CategoryMapper categoryMapper;
+    private final CategoryMapper categoryMapper; // (Bunu gələcəkdə silə bilərsən, CategoryService-də var)
     private final BeautyServiceMapper beautyServiceMapper;
 
 
@@ -32,7 +35,7 @@ public class BeautyServiceService {
 
     public List<BeautyServiceResponseDto> getAllByCategoryId(Long categoryId){
         categoryRepository.findById(categoryId).orElseThrow(() ->
-                new RuntimeException("Category not found with id: " + categoryId));
+                new ResourceNotFoundException("Category not found with id: " + categoryId));
         List<BeautyServiceResponseDto> services = beautyServiceRepository.findAllByCategoryId(categoryId)
                 .stream().map(beautyServiceMapper::toBeautyServiceResponseDto).toList();
         return services;
@@ -41,26 +44,26 @@ public class BeautyServiceService {
     public CategoryResponseDto findByIdCategory(Long id){
         CategoryResponseDto category = categoryRepository.findById(id)
                 .map(categoryMapper::toCategoryResponseDto).orElseThrow(()
-                        -> new RuntimeException(""));
+                        -> new ResourceNotFoundException("Category not found with id: " + id));
         return category;
     }
 
     public BeautyServiceResponseDto findByIdBeautyService(Long id){
         BeautyServiceResponseDto beautyService = beautyServiceRepository
                 .findById(id).map(beautyServiceMapper::toBeautyServiceResponseDto)
-                .orElseThrow(() -> new RuntimeException(""));
+                .orElseThrow(() -> new ResourceNotFoundException("Beauty service not found with id: " + id));
         return beautyService;
     }
 
     public BeautyServiceResponseDto create(BeautyServiceRequestDto beautyServiceRequestDto){
         if(beautyServiceRepository.existsByNameIgnoreCase(beautyServiceRequestDto.getName())){
-            throw new RuntimeException("");
+            throw new AlreadyExistsException("Beauty service already exists with name: " + beautyServiceRequestDto.getName());
         }
         BeautyServiceEntity newBeautyService = beautyServiceMapper
                 .toBeautyServiceEntity(beautyServiceRequestDto);
 
         CategoryEntity category = categoryRepository.findById(beautyServiceRequestDto.getCategoryId())
-                .orElseThrow(()-> new RuntimeException(""));
+                .orElseThrow(()-> new ResourceNotFoundException("Category not found with id: " + beautyServiceRequestDto.getCategoryId()));
 
         newBeautyService.setCategory(category);
         beautyServiceRepository.save(newBeautyService);
@@ -70,15 +73,15 @@ public class BeautyServiceService {
 
     public BeautyServiceResponseDto updateById(Long id, BeautyServiceRequestDto beautyServiceRequestDto){
         BeautyServiceEntity beautyService = beautyServiceRepository
-                .findById(id).orElseThrow(() -> new RuntimeException(""));
+                .findById(id).orElseThrow(() -> new ResourceNotFoundException("Beauty service not found with id: " + id));
 
         if(!beautyServiceRequestDto.getName().equalsIgnoreCase(beautyService.getName())
                 && beautyServiceRepository.existsByNameIgnoreCase(beautyServiceRequestDto.getName())){
-            throw new RuntimeException("");
+            throw new AlreadyExistsException("Beauty service already exists with name: " + beautyServiceRequestDto.getName());
         }
 
         CategoryEntity category =categoryRepository.findById(beautyServiceRequestDto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException(""));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + beautyServiceRequestDto.getCategoryId()));
 
         beautyService.setDescription(beautyServiceRequestDto.getDescription());
         beautyService.setPrice(beautyServiceRequestDto.getPrice());
@@ -91,10 +94,10 @@ public class BeautyServiceService {
 
     public void deleteById(long id){
         BeautyServiceEntity beautyService = beautyServiceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException(""));
+                .orElseThrow(() -> new ResourceNotFoundException("Beauty service not found with id: " + id));
 
-        if(beautyService.getBookings().isEmpty()){
-            throw new RuntimeException("");
+        if(!beautyService.getBookings().isEmpty()){
+            throw new BadRequestException("Cannot delete beauty service because it has active bookings.");
         }
         beautyServiceRepository.deleteById(id);
     }
