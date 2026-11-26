@@ -20,7 +20,7 @@ public class MasterEntity {
     private Long id;
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity userEntity;
+    private UserEntity user;
     @Column(nullable = false)
     private String specialization;
     private BigDecimal rating;
